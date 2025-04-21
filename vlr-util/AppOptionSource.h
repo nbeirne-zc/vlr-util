@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vlr-util/enums.SmartEnum.h"
-#include "vlr-util/StringCompare.h"
+#include "enums.SmartEnum.h"
+#include "StringCompare.h"
 
 namespace vlr {
 

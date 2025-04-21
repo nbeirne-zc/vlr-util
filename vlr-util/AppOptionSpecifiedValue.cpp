@@ -3,10 +3,10 @@
 
 #include <string>
 
-#include "vlr-util/strings.split.h"
-#include "vlr-util/util.convert.StringConversion.h"
-#include "vlr-util/util.overloaded.h"
-#include "vlr-util/util.range_checked_cast.h"
+#include "strings.split.h"
+#include "util.convert.StringConversion.h"
+#include "util.overloaded.h"
+#include "util.range_checked_cast.h"
 
 namespace vlr {
 
