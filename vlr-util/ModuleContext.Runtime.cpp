@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "ModuleContext.Runtime.h"
 
-#include <vlr-util/ModuleContext.Compilation.h>
+#include "ModuleContext.Compilation.h"
 
 #if defined(_WIN32)
 #include <debugapi.h>
