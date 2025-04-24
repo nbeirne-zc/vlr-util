@@ -19,6 +19,7 @@ set(no_group_source_files
 source_group("" FILES ${no_group_source_files})
 
 set(VLR_HEADER_FILES
+    "AppOptions.h"
     "ActionOnDestruction.h"
     "as_span.h"
     "as_string_view.h"
@@ -27,7 +28,6 @@ set(VLR_HEADER_FILES
     "AutoRevertingAssignment.h"
     "BaseWithVirtualDestructor.h"
     "c_runtime.StringFunctions.h"
-    "CloseEnough.h"
     "config.h"
     "cpp_namespace.h"
     "enums.FormatEnum.h"
@@ -39,7 +39,6 @@ set(VLR_HEADER_FILES
     "logging.LogMessage.h"
     "logging.MessageContext.h"
     "ModuleContext.Compilation.h"
-    "ModuleContext.Runtime.CommandLine.h"
     "ModuleContext.Runtime.ConfigOptionsBase.h"
     "ModuleContext.Runtime.h"
     "ops.NetworkTargetInfo.h"
@@ -60,7 +59,6 @@ set(VLR_HEADER_FILES
     "util.convert.DateTime.h"
     "util.convert.StringConversion.h"
     "util.convert.ToDisplay.h"
-    "util.CStringBufferAccess.h"
     "util.data_adaptor.MultiSZ.h"
     "util.includes.h"
     "util.IsBitSet.h"
@@ -90,8 +88,7 @@ set(VLR_HEADER_FILES
 source_group("Header Files" FILES ${VLR_HEADER_FILES})
 
 set(VLR_SOURCE_FILES
-    "CloseEnough.cpp"
-    "ModuleContext.Runtime.CommandLine.cpp"
+    "AppOptions.cpp"
     "ModuleContext.Runtime.ConfigOptionsBase.cpp"
     "ModuleContext.Runtime.cpp"
     "ops.NetworkTargetInfo.cpp"
@@ -105,6 +102,20 @@ set(VLR_SOURCE_FILES
     "util.StringConversion.cpp"
 #    "vlr-util.cpp"
 )
+
+# Platform specific source and header files
+if(MSVC)
+    list(APPEND VLR_HEADER_FILES
+        "CloseEnough.h"
+        "ModuleContext.Runtime.CommandLine.h"
+    )
+
+    list(APPEND VLR_SOURCE_FILES
+        "CloseEnough.cpp"
+        "ModuleContext.Runtime.CommandLine.cpp"
+    )
+endif()
+
 source_group("Source Files" FILES ${VLR_SOURCE_FILES})
 
 set(ALL_FILES
@@ -123,6 +134,9 @@ endif()
 ################################################################################
 add_library(${PROJECT_NAME} STATIC 
 	${ALL_FILES}
+)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
 	fmt::fmt
 )
 
@@ -144,59 +158,51 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE
 
 set(ROOT_NAMESPACE vlrutil)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    VS_GLOBAL_KEYWORD "Win32Proj"
-)
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        INTERPROCEDURAL_OPTIMIZATION_RELEASE "TRUE"
-    )
-elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x86")
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        INTERPROCEDURAL_OPTIMIZATION_RELEASE "TRUE"
-    )
-endif()
+#set_target_properties(${PROJECT_NAME} PROPERTIES
+#    VS_GLOBAL_KEYWORD "Win32Proj"
+#)
+
+#set_target_properties(${PROJECT_NAME} PROPERTIES
+#    INTERPROCEDURAL_OPTIMIZATION_RELEASE "TRUE"
+#)
+
 ################################################################################
 # Include directories
 ################################################################################
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
-    target_include_directories(${PROJECT_NAME} PUBLIC
-        "${CMAKE_CURRENT_SOURCE_DIR}/src"
-    )
-elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x86")
-    target_include_directories(${PROJECT_NAME} PUBLIC
-        "${CMAKE_CURRENT_SOURCE_DIR}/src"
-    )
-endif()
+target_include_directories(${PROJECT_NAME} PUBLIC
+    $<INSTALL_INTERFACE:include>
+)
 
 ################################################################################
 # Compile definitions
 ################################################################################
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE
-        "$<$<CONFIG:Debug>:"
-            "_DEBUG"
-        ">"
-        "$<$<CONFIG:Release>:"
-            "NDEBUG"
-        ">"
-        "_LIB;"
-        "UNICODE;"
-        "_UNICODE"
-    )
-elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x86")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE
-        "$<$<CONFIG:Debug>:"
-            "_DEBUG"
-        ">"
-        "$<$<CONFIG:Release>:"
-            "NDEBUG"
-        ">"
-        "WIN32;"
-        "_LIB;"
-        "UNICODE;"
-        "_UNICODE"
-    )
+if(MSVC)
+    if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
+        target_compile_definitions(${PROJECT_NAME} PRIVATE
+            "$<$<CONFIG:Debug>:"
+                "_DEBUG"
+            ">"
+            "$<$<CONFIG:Release>:"
+                "NDEBUG"
+            ">"
+            "_LIB;"
+            "UNICODE;"
+            "_UNICODE"
+        )
+    elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x86")
+        target_compile_definitions(${PROJECT_NAME} PRIVATE
+            "$<$<CONFIG:Debug>:"
+                "_DEBUG"
+            ">"
+            "$<$<CONFIG:Release>:"
+                "NDEBUG"
+            ">"
+            "WIN32;"
+            "_LIB;"
+            "UNICODE;"
+            "_UNICODE"
+        )
+    endif()
 endif()
 
 ################################################################################
